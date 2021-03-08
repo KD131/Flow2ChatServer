@@ -1,5 +1,11 @@
-import java.io.*;
-import java.net.*;
+package Client;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.Scanner;
 
 public class Client
@@ -50,7 +56,7 @@ public class Client
                     try {
                         // read the message sent to this client
                         String msg = dis.readUTF();
-                        if(msg.equalsIgnoreCase("logout")){
+                        if(msg.startsWith("CLOSE#")){
                             dis.close();
                             dos.close();
                             s.close();
