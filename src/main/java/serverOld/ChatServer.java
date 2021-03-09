@@ -11,7 +11,7 @@ public class ChatServer {
     //Call server with arguments like this: 0.0.0.0 8088 logfile.log
     public static void main(String[] args) throws UnknownHostException {
         String ip ="localhost";
-        int port = 8088;
+        int port = 1234;
         String logFile = "log.txt";  //Do we need this
 
         try {

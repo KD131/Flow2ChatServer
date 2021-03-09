@@ -5,9 +5,12 @@ package Server;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.time.LocalDateTime;
+import java.util.Scanner;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -18,6 +21,7 @@ public class Server
     static Vector<ClientHandler> ar = new Vector<>();
     
     
+
     // counter for clients
     static int i = 0;
     
@@ -64,6 +68,7 @@ public class Server
             // i is used for naming only, and can be replaced
             // by any naming scheme
             i++;
+            
         }
         ss.close();
     }
@@ -77,8 +82,8 @@ class ClientHandler implements Runnable
     final DataOutputStream dos;
     Socket s;
     boolean loggedin;
+    FileWriter logger;
     
-    // constructor
     public ClientHandler(Socket s, String name, DataInputStream dis, DataOutputStream dos)
     {
         this.dis = dis;
@@ -86,6 +91,16 @@ class ClientHandler implements Runnable
         this.name = name;
         this.s = s;
         this.loggedin = false;
+        
+        try
+        {
+            this.logger = new FileWriter("log/logfile.log",true);
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    
     }
     
     @Override
@@ -112,11 +127,17 @@ class ClientHandler implements Runnable
                     if (connect(param1))    // successfully logs in
                     {
                         onlineList();
-                        System.out.println(this.name + " has joined the server!");
+                        String text = this.name + " has joined the server!";
+                        System.out.println(text);
+                        logger.write(LocalDateTime.now()+" | "+text+"\n");
+                        logger.flush();
                     }
                     else
                     {
-                        System.out.println("User not found!");
+                        String text = this.name + " | User not found!";
+                        System.out.println(text);
+                        logger.write(LocalDateTime.now()+" | "+text+"\n");
+                        logger.flush();
                         dos.writeUTF("CLOSE#2"); //user not found
                         close();
                         break;
@@ -126,7 +147,11 @@ class ClientHandler implements Runnable
                 else if (cmd.equals("CLOSE") && loggedin)
                 {
                     dos.writeUTF("CLOSE#0"); //normal close
-                    System.out.println(this.name + " logged out.");
+                    String text = this.name + " logged out.";
+                    System.out.println(text);
+                    logger.write(LocalDateTime.now()+" | "+text+"\n");
+                    logger.flush();
+                    this.loggedin = false;
                     onlineList();
                     close();
                     break;
@@ -145,7 +170,10 @@ class ClientHandler implements Runnable
                 // no valid command
                 else
                 {
-                    System.out.println("Illegal input!");
+                    String text = this.name + " | Illegal input!";
+                    System.out.println(text);
+                    logger.write(LocalDateTime.now()+" | "+text+"\n");
+                    logger.flush();
                     dos.writeUTF("CLOSE#1"); //illegal input
                     close();
                     break;
@@ -188,6 +216,9 @@ class ClientHandler implements Runnable
                 mc.dos.writeUTF("MESSAGE#" + this.name + "#" + msg);
             }
         }
+        String text = "MESSAGE#" + this.name + "#" + msg;
+        logger.write(LocalDateTime.now()+" | "+text+"\n");
+        logger.flush();
     }
     
     public void close() throws IOException
@@ -195,7 +226,7 @@ class ClientHandler implements Runnable
         this.dis.close();
         this.dos.close();
         this.s.close();
-        this.loggedin = false;
+        this.logger.close();
         Server.ar.remove(this);
     }
     
@@ -216,5 +247,11 @@ class ClientHandler implements Runnable
         {
             mc.dos.writeUTF(sb.toString());
         }
+        if(sb.toString().equals("ONLINE")){
+            sb.append("#*eerie silence*");
+        }
+        String text = sb.toString();
+        logger.write(LocalDateTime.now()+" | "+text+"\n");
+        logger.flush();
     }
 }

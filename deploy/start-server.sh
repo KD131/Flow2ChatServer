@@ -1,3 +1,4 @@
 #!/bin/sh
 
-java -cp chat-client-server.jar server.ChatServer 0.0.0.0 1234 logfile.log
+java -cp chat-client-server.jar server.ChatServer 46.101.246.201 1234 log/logfile.log
+#original IP was "0.0.0.0", currently IP and port have been changed to fit our program
