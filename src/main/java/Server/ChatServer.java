@@ -9,7 +9,7 @@ public class ChatServer {
     public static void main(String[] args) throws UnknownHostException {
         String ip ="localhost";
         int port = 1234;
-        String logFile = "log.txt";  //Do we need this
+        String logFile = "log.txt";
 
         try {
             if (args.length == 3) {
