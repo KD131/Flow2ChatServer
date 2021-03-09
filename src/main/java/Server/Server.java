@@ -16,56 +16,56 @@ public class Server
 {
     // Vector to store active clients
     static Vector<ClientHandler> ar = new Vector<>();
-
-
+    
+    
     // counter for clients
     static int i = 0;
-
+    
     public static void main(String[] args) throws IOException
     {
-        boolean run = true;
+        boolean running = true;
         // server is listening on port 1234
         ServerSocket ss = new ServerSocket(1234);
-
+        
         Socket s = null;
         // running infinite loop for getting
         // client request
-        while (run)
+        while (running)
         {
-
+            
             System.out.println("Waiting for client...");
             // Accept the incoming request
             s = ss.accept();
-
+            
             System.out.println("New client request received : " + s);
-
+            
             // obtain input and output streams
             DataInputStream dis = new DataInputStream(s.getInputStream());
             DataOutputStream dos = new DataOutputStream(s.getOutputStream());
-
+            
             System.out.println("Creating a new handler for this client...");
-
+            
             // Create a new handler object for handling this request.
-            ClientHandler mtch = new ClientHandler(s,"unnamed"+i, dis, dos);
-
+            ClientHandler mtch = new ClientHandler(s, "unnamed" + i, dis, dos);
+            
             // Create a new Thread with this object.
             Thread t = new Thread(mtch);
-
+            
             System.out.println("Adding this client to active client list");
-
+            
             // add this client to active clients list
-
+            
             ar.add(mtch);
-
+            
             // start the thread.
             t.start();
-
+            
             // increment i for new client.
             // i is used for naming only, and can be replaced
             // by any naming scheme
             i++;
         }
-        s.close();
+        ss.close();
     }
 }
 
@@ -76,19 +76,21 @@ class ClientHandler implements Runnable
     final DataInputStream dis;
     final DataOutputStream dos;
     Socket s;
-    boolean isloggedin;
-
+    boolean loggedin;
+    
     // constructor
-    public ClientHandler(Socket s, String name, DataInputStream dis, DataOutputStream dos) {
+    public ClientHandler(Socket s, String name, DataInputStream dis, DataOutputStream dos)
+    {
         this.dis = dis;
         this.dos = dos;
         this.name = name;
         this.s = s;
+        this.loggedin = false;
     }
-
+    
     @Override
-    public void run() {
-        boolean doOnce = true;
+    public void run()
+    {
         String received;
         while (true)
         {
@@ -98,118 +100,121 @@ class ClientHandler implements Runnable
                 received = dis.readUTF(); //crashes server if client 0 disconnects
                 System.out.println(received);
                 
-                if(received.startsWith("CONNECT#") && doOnce){
-                    doOnce = false;
-                    try
+                // breaks string into cmd and parameters
+                StringTokenizer st = new StringTokenizer(received, "#");
+                String cmd = (st.hasMoreTokens()) ? st.nextToken() : "";
+                String param1 = (st.hasMoreTokens()) ? st.nextToken() : "";
+                String param2 = (st.hasMoreTokens()) ? st.nextToken() : "";
+                
+                // has to attempt login as first command
+                if (cmd.equals("CONNECT") && !loggedin)
+                {
+                    if (connect(param1))    // successfully logs in
                     {
-                        this.name = received.split("#")[1];
-                        this.isloggedin=true;
                         onlineList();
+                        System.out.println(this.name + " has joined the server!");
                     }
-                    catch (ArrayIndexOutOfBoundsException ex){ //if name is entered blank
+                    else
+                    {
                         System.out.println("User not found!");
                         dos.writeUTF("CLOSE#2"); //user not found
                         close();
                         break;
                     }
-                    System.out.println(this.name+" has joined the server!");
                 }
                 
-                else if(received.equalsIgnoreCase("CLOSE#") && !doOnce){
+                else if (cmd.equals("CLOSE") && loggedin)
+                {
                     dos.writeUTF("CLOSE#0"); //normal close
-                    System.out.println(this.name+" logged out.");
+                    System.out.println(this.name + " logged out.");
                     onlineList();
                     close();
                     break;
                 }
                 
-                else if(received.startsWith("ONLINE#") && !doOnce){
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("ONLINE#");
-                    for (ClientHandler mc : Server.ar){
-                        if(mc.isloggedin) //checks if a user is logged in
-                        {
-                            sb.append(mc.name).append(",");
-                        }
-                    }
-                    sb.deleteCharAt(sb.toString().length()-1);  //deletes last comma
-                    dos.writeUTF(sb.toString());
+                else if (cmd.equals("ONLINE") && loggedin)
+                {
+                   onlineList();
                 }
                 
-                else if(received.startsWith("SEND#") && !doOnce){
-                    // break the string into message and recipient part
-                    StringTokenizer st = new StringTokenizer(received, "#");
-                    st.nextToken(); //skips command
-                    String recipient = (st.hasMoreTokens()) ? st.nextToken() : "none";
-                    String MsgToSend = (st.hasMoreTokens()) ? st.nextToken() : "";
-    
-                    // search for the recipient in the connected devices list.
-                    // ar is the vector storing client of active users
-                    for (ClientHandler mc : Server.ar)
-                    {
-                        if(recipient.equalsIgnoreCase("*") && mc != this){
-                            mc.dos.writeUTF("MESSAGE#" + this.name + "#" + MsgToSend);
-                        }
-                        // if the recipient is found, write on its
-                        // output stream
-                        if (recipient.contains(mc.name) && mc.isloggedin && !mc.name.equalsIgnoreCase("*"))
-                        {
-                            mc.dos.writeUTF("MESSAGE#" + this.name + "#" + MsgToSend);
-                        }
-                    }
+                else if (cmd.equals("SEND") && loggedin)
+                {
+                    sendMessage(param1, param2);
                 }
-                else {
+                
+                // no valid command
+                else
+                {
                     System.out.println("Illegal input!");
                     dos.writeUTF("CLOSE#1"); //illegal input
                     close();
                     break;
                 }
             }
-            catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-    
-    public void close()
-    {
-        try
-        {
-            this.dis.close();
-            this.dos.close();
-            this.s.close();
-            this.isloggedin = false;
-            Server.ar.remove(this);
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-    
-    }
-    
-    //ONLINE user list
-    public void onlineList(){ //sends a message to all logged-in users about who is online
-        StringBuilder sb = new StringBuilder();
-        sb.append("ONLINE#");
-        for (ClientHandler mc : Server.ar)
-        {
-            if(mc.isloggedin) //checks if a user is logged in
-            {
-                sb.append(mc.name).append(",");
-            }
-        }
-        sb.deleteCharAt(sb.toString().length()-1);  //deletes last comma
-        for (ClientHandler mc : Server.ar)
-        {
-            try
-            {
-                mc.dos.writeUTF(sb.toString());
-            }
             catch (IOException e)
             {
                 e.printStackTrace();
             }
+        }
+    }
+    
+    // returns true if successfully logged in.
+    // returns false if no name given.
+    public boolean connect(String name)
+    {
+        if (name.equals(""))
+        {
+            return false;
+        }
+        this.name = name;
+        this.loggedin = true;
+        return true;
+    }
+    
+    public void sendMessage(String recipient, String msg) throws IOException
+    {
+        // search for the recipient in the connected devices list.
+        // ar is the vector storing client of active users
+        for (ClientHandler mc : Server.ar)
+        {
+            if (recipient.equalsIgnoreCase("*") && mc != this)      // doesn't send to self
+            {
+                mc.dos.writeUTF("MESSAGE#" + this.name + "#" + msg);
+            }
+            // if the recipient is found, write on its
+            // output stream
+            if (recipient.contains(mc.name) && mc.loggedin && !mc.name.equalsIgnoreCase("*"))
+            {
+                mc.dos.writeUTF("MESSAGE#" + this.name + "#" + msg);
+            }
+        }
+    }
+    
+    public void close() throws IOException
+    {
+        this.dis.close();
+        this.dos.close();
+        this.s.close();
+        this.loggedin = false;
+        Server.ar.remove(this);
+    }
+    
+    //ONLINE user list
+    public void onlineList() throws IOException
+    { //sends a message to all logged-in users about who is online
+        StringBuilder sb = new StringBuilder();
+        sb.append("ONLINE#");
+        for (ClientHandler mc : Server.ar)
+        {
+            if (mc.loggedin) //checks if a user is logged in
+            {
+                sb.append(mc.name).append(",");     // constructs message
+            }
+        }
+        sb.deleteCharAt(sb.toString().length() - 1);  //deletes last comma
+        for (ClientHandler mc : Server.ar)      // sends message to all
+        {
+            mc.dos.writeUTF(sb.toString());
         }
     }
 }
