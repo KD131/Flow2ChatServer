@@ -1,4 +1,4 @@
 
-java -cp chat-client-server.jar Server.ChatServer 1234
+java -cp chat-server.jar server.Server 1234
 
 

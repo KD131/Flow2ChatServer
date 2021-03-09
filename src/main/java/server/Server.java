@@ -1,4 +1,4 @@
-package Server;
+package server;
 // Java implementation of Server side
 // It contains two classes : Server and ClientHandler
 // Save file as Server.java
@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.time.LocalDateTime;
-import java.util.Scanner;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -19,7 +18,6 @@ public class Server
 {
     // Vector to store active clients
     static Vector<ClientHandler> ar = new Vector<>();
-    
     
 
     // counter for clients

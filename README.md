@@ -1,4 +1,4 @@
-## Quick Start Project for the Chat - Server
+## Quick Start Project for the Chat - server
 
 Simple Maven Project which can be used for the Chat-CA 
 

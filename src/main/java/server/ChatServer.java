@@ -1,4 +1,4 @@
-package Server;
+package server;
 
 import java.net.UnknownHostException;
 
@@ -24,8 +24,5 @@ public class ChatServer {
             System.out.println("Illegal inputs provided when starting the server!");
             return;
         }
-
     }
-
-
 }
