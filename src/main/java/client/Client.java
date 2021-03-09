@@ -10,14 +10,14 @@ import java.util.Scanner;
 
 public class Client
 {
-    final static int ServerPort = 1234;
+    final static int ServerPort = 1234; //change to Server port
 
     public static void main(String args[]) throws UnknownHostException, IOException
     {
         Scanner scn = new Scanner(System.in);
 
         // getting localhost ip
-        InetAddress ip = InetAddress.getByName("localhost");
+        InetAddress ip = InetAddress.getByName("46.101.246.201"); //change to Droplet IP
 
         // establish the connection
         Socket s = new Socket(ip, ServerPort);
