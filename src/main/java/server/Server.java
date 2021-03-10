@@ -127,15 +127,13 @@ class ClientHandler implements Runnable
                         onlineList();
                         String text = this.name + " has joined the server!";
                         System.out.println(text);
-                        logger.write(LocalDateTime.now()+" | "+text+"\n");
-                        logger.flush();
+                        logEntry(text);
                     }
                     else
                     {
                         String text = this.name + " | User not found!";
                         System.out.println(text);
-                        logger.write(LocalDateTime.now()+" | "+text+"\n");
-                        logger.flush();
+                        logEntry(text);
                         dos.writeUTF("CLOSE#2"); //user not found
                         close();
                         break;
@@ -147,8 +145,7 @@ class ClientHandler implements Runnable
                     dos.writeUTF("CLOSE#0"); //normal close
                     String text = this.name + " logged out.";
                     System.out.println(text);
-                    logger.write(LocalDateTime.now()+" | "+text+"\n");
-                    logger.flush();
+                    logEntry(text);
                     this.loggedin = false;
                     onlineList();
                     close();
@@ -170,8 +167,7 @@ class ClientHandler implements Runnable
                 {
                     String text = this.name + " | Illegal input!";
                     System.out.println(text);
-                    logger.write(LocalDateTime.now()+" | "+text+"\n");
-                    logger.flush();
+                    logEntry(text);
                     dos.writeUTF("CLOSE#1"); //illegal input
                     close();
                     break;
@@ -195,6 +191,12 @@ class ClientHandler implements Runnable
         this.name = name;
         this.loggedin = true;
         return true;
+    }
+    
+    public void logEntry(String entry) throws IOException
+    {
+        logger.write(LocalDateTime.now()+" | "+entry+"\n");
+        logger.flush();
     }
     
     public void sendMessage(String recipient, String msg) throws IOException
