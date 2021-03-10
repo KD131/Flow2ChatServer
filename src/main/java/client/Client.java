@@ -11,13 +11,15 @@ import java.util.Scanner;
 public class Client
 {
     final static int ServerPort = 1234; //change to Server port
+    
+    static volatile boolean closing;
 
     public static void main(String args[]) throws UnknownHostException, IOException
     {
         Scanner scn = new Scanner(System.in);
 
         // getting localhost ip
-        InetAddress ip = InetAddress.getByName("46.101.246.201"); //change to Droplet IP
+        InetAddress ip = InetAddress.getByName("localhost"); //change to Droplet IP
 
         // establish the connection
         Socket s = new Socket(ip, ServerPort);
@@ -36,7 +38,10 @@ public class Client
 
                     // read the message to deliver.
                     String msg = scn.nextLine();
-
+                    if (msg.equals("CLOSE#"))
+                    {
+                        closing = true;
+                    }
                     try {
                         // write on the output stream
                         dos.writeUTF(msg);
@@ -56,13 +61,17 @@ public class Client
                     try {
                         // read the message sent to this client
                         String msg = dis.readUTF();
+                        
                         if(msg.startsWith("CLOSE#")){
                             dis.close();
                             dos.close();
                             s.close();
                             System.exit(0);
                         }
-                        System.out.println(msg);
+                        if (!closing)   // so long as we're not closing
+                        {
+                            System.out.println(msg);    // default functionality
+                        }
                     } catch (IOException e) {
 
                         e.printStackTrace();
