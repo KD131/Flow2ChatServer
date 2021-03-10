@@ -217,8 +217,7 @@ class ClientHandler implements Runnable
             }
         }
         String text = "MESSAGE#" + this.name + "#" + msg;
-        logger.write(LocalDateTime.now()+" | "+text+"\n");
-        logger.flush();
+        logEntry(text);
     }
     
     public void close() throws IOException
@@ -242,16 +241,18 @@ class ClientHandler implements Runnable
                 sb.append(mc.name).append(",");     // constructs message
             }
         }
-        sb.deleteCharAt(sb.toString().length() - 1);  //deletes last comma
-        for (ClientHandler mc : Server.ar)      // sends message to all
+        sb.deleteCharAt(sb.toString().length() - 1);  //deletes last comma ... it is noget gøgl?
+        for (ClientHandler mc : Server.ar)      // sends message to all users logged in
         {
-            mc.dos.writeUTF(sb.toString());
+            if (mc.loggedin)
+            {
+                mc.dos.writeUTF(sb.toString());
+            }
         }
-        if(sb.toString().equals("ONLINE")){
+        if(sb.toString().equals("ONLINE")){ //it works ¯\_(ツ)_/¯
             sb.append("#*eerie silence*");
         }
         String text = sb.toString();
-        logger.write(LocalDateTime.now()+" | "+text+"\n");
-        logger.flush();
+        logEntry(text);
     }
 }
