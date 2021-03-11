@@ -39,6 +39,7 @@ class ClientHandlerTest
             serverOut = new DataOutputStream(serverClientSocket.getOutputStream());
             user1 = new ClientHandler(clientSocket,"user1",serverIn,serverOut);
             Server.ar.add(user1);
+            Server.acceptedUsers.add("Lars");
         }
         catch (IOException e)
         {
@@ -58,7 +59,8 @@ class ClientHandlerTest
             serverOut.close();
             serverClientSocket.close();
             ss.close();
-            Server.ar.remove(user1);
+            Server.ar.clear();
+            Server.acceptedUsers.clear();
         }
         catch (IOException e)
         {
@@ -79,7 +81,7 @@ class ClientHandlerTest
     void connectFailure()
     {
         assertFalse(user1.loggedin);
-        assertFalse(user1.connect(""));
+        assertFalse(user1.connect("notRealUser"));
         assertFalse(user1.loggedin);
     }
     

@@ -86,12 +86,13 @@ class ClientHandler implements Runnable
                     close();
                     break;
                 }
-                
+                /*
+                //we were told this was feature-creeping, so we've left it commented out
                 else if (cmd.equals("ONLINE") && loggedin)
                 {
                     onlineList();
                 }
-                
+                */
                 else if (cmd.equals("SEND") && loggedin)
                 {
                     sendMessage(param1, param2);
@@ -124,13 +125,16 @@ class ClientHandler implements Runnable
     // returns false if no name given.
     public boolean connect(String name)
     {
-        if (name.equals(""))
+        for (String user : Server.acceptedUsers)
         {
-            return false;
+            if (name.equals(user))
+            {
+                this.name = name;
+                this.loggedin = true;
+                return true;
+            }
         }
-        this.name = name;
-        this.loggedin = true;
-        return true;
+        return false;
     }
     
     public void logEntry(String entry) throws IOException

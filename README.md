@@ -15,9 +15,11 @@ Active droplet server ip: 46.101.246.201
 DESIGN DESCRIPTION:
 - We worked based on the project we'd developed with Daniel in his classes. It contains a client utilising threads to handle input and output separately, so we don't get locked down by blocking-calls. To this end, our server handles the clients using a Vector list, as this utilises the 'Synchronised' identifier to ensure that Race Condition doesn't occur, when we have several active clients connected.
 - It is a bit difficult to say a lot about our design choices, aside from this, as we were tasked to follow the project structure to the letter. We therefore didn't add anything that we weren't told to add, aside from the log, which seemed to have been redacted as a requirement sometime during the week.
+- After doing the acceptance tests with Schwencke, we realised that we used a dynamic user list, and not a hardcoded one. This was easy to fix.
 
 WHO DID WHAT:
 - Kris spent a lot of time Wednesday figuring out problems with the droplet. Kasper and Nicklas did basically all the UnitTesting. But aside from that, all three of us mostly coded everything together using code-with-me.
 
 ACCEPTANCE TESTS:
-- 
+- Our server and client works with other groups' stuff, but the acceptance tests revealed that we'd misunderstood certain aspects of the protocol, such as the need to have a hardcoded user list, but this is something that's easy to fix.
+- After fixing the few shortcomings, we passed all test with flying colours.

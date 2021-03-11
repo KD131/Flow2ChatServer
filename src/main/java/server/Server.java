@@ -13,6 +13,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 // Server class
@@ -20,18 +22,28 @@ public class Server
 {
     // Vector to store active clients
     static Vector<ClientHandler> ar = new Vector<>();
-    
+    static List<String> acceptedUsers = new ArrayList<>();
 
     // counter for clients
     static int i = 0;
     
     public static void main(String[] args) throws IOException
     {
+        // hard-coded list of users
+        acceptedUsers.add("Hacker-man");
+        acceptedUsers.add("Kasper");
+        acceptedUsers.add("Nicklas");
+        acceptedUsers.add("Kris");
+        acceptedUsers.add("Test-user");
+        acceptedUsers.add("Lars");
+        acceptedUsers.add("Hans");
+        acceptedUsers.add("Peter");
+
         boolean running = true;
         // server is listening on port 1234
         ServerSocket ss = new ServerSocket(1234);
         
-        Socket s = null;
+        Socket s;
         // running infinite loop for getting
         // client request
         while (running)
